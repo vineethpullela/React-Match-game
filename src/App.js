@@ -1,4 +1,5 @@
 import {Component} from 'react'
+
 import './App.css'
 
 // These are the lists used in the application. You can move them to any component needed.
@@ -247,18 +248,32 @@ const imagesList = [
   },
 ]
 
+// Replace your code here
 class App extends Component {
   state = {
-    activeTabId: tabsList[0].tabId,
+    isTrue: false,
+    category: 'FRUIT',
     score: 0,
     time: 60,
-    isTrue: false,
     imgUrl: imagesList[0].imageUrl,
-    category: 'FRUIT',
   }
 
   componentDidMount() {
     this.timerId = setInterval(this.statusChange, 1000)
+  }
+
+  statusChange = () => {
+    const {time} = this.state
+    if (time !== 0) {
+      this.setState(prevState => ({time: prevState.time - 1}))
+    } else {
+      clearInterval(this.timerId)
+      this.setState({isTrue: true})
+    }
+  }
+
+  clickTab = tabId => {
+    this.setState({category: tabId})
   }
 
   imageClick = thumbnailUrl => {
@@ -281,130 +296,108 @@ class App extends Component {
     }
   }
 
-  statusChange = () => {
-    const {time} = this.state
-    if (time !== 0) {
-      this.setState(prevState => ({time: prevState.time - 1}))
-    } else {
-      clearInterval(this.timerId)
-      this.setState({isTrue: true})
-    }
-  }
-
-  changeTab = tabId => {
-    this.setState({activeTabId: tabId})
-  }
-
   playAgain = () => {
     this.setState({
-      activeTabId: tabsList[0].tabId,
       score: 0,
-      time: 60,
-      isTrue: false,
       imgUrl: imagesList[0].imageUrl,
       category: 'FRUIT',
+      isTrue: false,
+      time: 60,
     })
     this.timerId = setInterval(this.statusChange, 1000)
   }
 
   render() {
-    const {isTrue, category, score, time, imgUrl, activeTabId} = this.state
-    console.log(imgUrl)
+    const {isTrue, category, score, time, imgUrl} = this.state
     const thumbnailList = imagesList.filter(
-      eachItem => eachItem.category === activeTabId,
+      eachValue => eachValue.category === category,
     )
-
     return (
-      <div className="app-container">
-        <nav className="nav-header">
+      <div className="main-container">
+        <nav className="nav-bar">
           <img
             src="https://assets.ccbp.in/frontend/react-js/match-game-website-logo.png"
+            className="top-image"
             alt="website logo"
-            className="app-log"
           />
-          <ul className="score-timer-container">
+          <ul className="score-div">
             <li className="score-name">
-              <p className="score-text">
+              <p>
                 Score: <span className="score">{score}</span>
               </p>
             </li>
-
-            <li className="timer-container">
+            <li className="score-div">
               <img
                 src="https://assets.ccbp.in/frontend/react-js/match-game-timer-img.png"
                 alt="timer"
-                className="timer-icon"
+                className="timer-img"
               />
-              <p className="timer-text">{time} sec</p>
+              <p className="time">{time} sec</p>
             </li>
           </ul>
         </nav>
-        {!isTrue && (
-          <div className="main-container">
-            <img src={imgUrl} alt="match" className="display-image" />
-          </div>
-        )}
-        {!isTrue && (
-          <ul className="tabs-container">
-            {tabsList.map(eachTab => (
-              <li className="tab-item-container" key={eachTab.tabId}>
-                <button
-                  className={`button ${
-                    eachTab.tabId === activeTabId ? 'active-tab' : ''
-                  }`}
-                  type="button"
-                  onClick={() => this.changeTab(eachTab.tabId)}
-                >
-                  {eachTab.displayText}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-        {!isTrue && (
-          <ul className="thumbnails-container">
-            {thumbnailList.map(eachImg => (
-              <li className="thumbnail-card" key={eachImg.id}>
-                <button
-                  type="button"
-                  className="thumbnail-btn"
-                  key={eachImg.category}
-                  onClick={() => this.imageClick(eachImg.thumbnailUrl)}
-                >
-                  <img
-                    src={eachImg.thumbnailUrl}
-                    className="thumbnail-img"
-                    alt="thumbnail"
-                  />
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {isTrue && (
-          <div className="score-card-container">
-            <img
-              src="https://assets.ccbp.in/frontend/react-js/match-game-trophy.png "
-              alt="trophy"
-              className="trophy-img"
-            />
-            <p className="your-score-text">YOUR SCORE</p>
-            <p className="score">{score}</p>
-            <button
-              type="button"
-              className="play-again-btn"
-              onClick={this.playAgain}
-            >
+        <div className="content-div">
+          {!isTrue && (
+            <div className="first-div">
+              <img src={imgUrl} className="big-image" alt="match" />
+              <ul className="tab-elements">
+                {tabsList.map(eachValue => (
+                  <li key={eachValue.tabId}>
+                    <button
+                      type="button"
+                      className={`tab-button ${
+                        category === eachValue.tabId ? 'highlight-text' : ''
+                      }`}
+                      onClick={() => this.clickTab(eachValue.tabId)}
+                    >
+                      {eachValue.displayText}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <ul className="thumbnail-images">
+                {thumbnailList.map(eachObject => (
+                  <li key={eachObject.id}>
+                    <button
+                      type="button"
+                      className="image-button"
+                      onClick={() => this.imageClick(eachObject.thumbnailUrl)}
+                    >
+                      <img
+                        src={eachObject.thumbnailUrl}
+                        className="thumbnail-image"
+                        alt="thumbnail"
+                      />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {isTrue && (
+            <div className="second-div">
               <img
-                src="https://assets.ccbp.in/frontend/react-js/match-game-play-again-img.png"
-                alt="reset"
-                className="reset-img"
+                src="https://assets.ccbp.in/frontend/react-js/match-game-trophy.png"
+                className="trophy-image"
+                alt="trophy"
               />
-              PLAY AGAIN
-            </button>
-          </div>
-        )}
+              <p className="main-heading">YOUR SCORE</p>
+              <p className="your-score">{score}</p>
+              <button
+                type="button"
+                className="play-button"
+                onClick={this.playAgain}
+              >
+                <img
+                  src="https://assets.ccbp.in/frontend/react-js/match-game-play-again-img.png"
+                  className="restart"
+                  alt="reset"
+                />
+                PLAY AGAIN
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     )
   }
